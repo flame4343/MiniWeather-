@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.util.Log;
@@ -32,9 +34,11 @@ import javax.net.ssl.HttpsURLConnection;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final int UPDATE_TODAY_WEATHER = 1;
 
-    private ImageView MUpdateBtn;
+    private ImageView mUpdateBtn,mTitleShare;
 
     private ImageView mCitySelect;
+
+    private ProgressBar mUpdateProgress;
 
     private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv, pmQualityTv, temperatureTv, climateTv, windTv, city_name_Tv;
     private ImageView weatherImg, pmImg;
@@ -54,8 +58,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather_info);
 
-        MUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);
-        MUpdateBtn.setOnClickListener(this);
+        mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);
+        mUpdateBtn.setOnClickListener(this);
 
         if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
             Log.d("myWeather", "网络OK");
@@ -96,6 +100,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         windTv.setText("N/A");
     }
 
+    public void setUpdateProgress(){
+        mUpdateBtn=(ImageView) findViewById(R.id.title_update_btn);
+        mUpdateProgress=(ProgressBar)findViewById(R.id.title_update_progress);
+        mTitleShare=(ImageView)findViewById(R.id.title_share);
+
+        mUpdateBtn.setVisibility(View.GONE);
+
+        RelativeLayout.LayoutParams params=(RelativeLayout.LayoutParams)mTitleShare.getLayoutParams();
+        params.addRule(RelativeLayout.LEFT_OF,R.id.title_update_progress);
+        mTitleShare.setLayoutParams(params);
+
+        mUpdateProgress.setVisibility(View.VISIBLE);
+    }
+
+    public void setUpdateBtn(){
+        mUpdateBtn=(ImageView) findViewById(R.id.title_update_btn);
+        mUpdateProgress=(ProgressBar)findViewById(R.id.title_update_progress);
+        mUpdateBtn.setVisibility(View.VISIBLE);
+
+        mTitleShare=(ImageView)findViewById(R.id.title_share);
+
+        RelativeLayout.LayoutParams params=(RelativeLayout.LayoutParams)mTitleShare.getLayoutParams();
+        // params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        params.addRule(RelativeLayout.LEFT_OF,R.id.title_update_btn);
+        mTitleShare.setLayoutParams(params);
+
+        mUpdateProgress.setVisibility(View.GONE);
+    }
 
     @Override
     public void onClick(View view) {
@@ -105,6 +137,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivityForResult(i,1);
         }
         if (view.getId() == R.id.title_update_btn) {
+
+            setUpdateProgress();
+
             SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
             String cityCode = sharedPreferences.getString("main_city_code", "101010100");
             Log.d("my Weather", cityCode);
@@ -275,5 +310,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         climateTv.setText(todayWeather.getType());
         windTv.setText("风力:"+todayWeather.getFengli());
         Toast.makeText(MainActivity.this,"更新成功！",Toast.LENGTH_SHORT).show();
+        setUpdateBtn();
     }
 }
